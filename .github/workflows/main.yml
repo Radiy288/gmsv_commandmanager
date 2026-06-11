@@ -1,14 +1,15 @@
-name: gmsv_commandmanager build
+name: gmsv_commandmanager CI
 
 on:
   push:
     branches: [ "main", "master" ]
   pull_request:
+  workflow_dispatch:
 
 jobs:
 
 # =========================
-# WINDOWS x64 (VS2022)
+# WINDOWS x64
 # =========================
   windows-x64:
     runs-on: windows-latest
@@ -17,31 +18,34 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup MSBuild
-        uses: microsoft/setup-msbuild@v2
+      - name: Download premake5
+        run: |
+          Invoke-WebRequest `
+          https://github.com/premake/premake-core/releases/download/v5.0.0-beta8/premake-5.0.0-beta8-windows.zip `
+          -OutFile premake.zip
+          Expand-Archive premake.zip -DestinationPath premake
 
       - name: Clone garrysmod_common
         run: git clone https://github.com/danielga/garrysmod_common.git
 
       - name: Generate project (x64)
         run: |
-          .\premake5.exe --gmcommon=.\garrysmod_common vs2022
+          .\premake\premake5.exe --gmcommon=.\garrysmod_common vs2022
 
       - name: Build x64
         run: |
           msbuild projects\commandmanager.sln /p:Configuration=Release /p:Platform=x64
 
-      - name: Upload x64 artifact
+      - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: gmsv_win64
           path: |
-            **/*win64*.dll
             **/*.dll
 
 
 # =========================
-# WINDOWS x86 (win32)
+# WINDOWS x86 (WIN32)
 # =========================
   windows-x86:
     runs-on: windows-latest
@@ -50,31 +54,34 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup MSBuild
-        uses: microsoft/setup-msbuild@v2
+      - name: Download premake5
+        run: |
+          Invoke-WebRequest `
+          https://github.com/premake/premake-core/releases/download/v5.0.0-beta8/premake-5.0.0-beta8-windows.zip `
+          -OutFile premake.zip
+          Expand-Archive premake.zip -DestinationPath premake
 
       - name: Clone garrysmod_common
         run: git clone https://github.com/danielga/garrysmod_common.git
 
       - name: Generate project (win32)
         run: |
-          .\premake5.exe --gmcommon=.\garrysmod_common vs2022
+          .\premake\premake5.exe --gmcommon=.\garrysmod_common vs2022
 
       - name: Build win32
         run: |
           msbuild projects\commandmanager.sln /p:Configuration=Release /p:Platform=Win32
 
-      - name: Upload win32 artifact
+      - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: gmsv_win32
           path: |
-            **/*win32*.dll
             **/*.dll
 
 
 # =========================
-# LINUX (x86_64)
+# LINUX x64
 # =========================
   linux:
     runs-on: ubuntu-latest
@@ -86,13 +93,16 @@ jobs:
       - name: Install deps
         run: |
           sudo apt update
-          sudo apt install -y build-essential git
+          sudo apt install -y build-essential git wget
+
+      - name: Download premake5
+        run: |
+          wget https://github.com/premake/premake-core/releases/download/v5.0.0-beta8/premake-5.0.0-beta8-linux.tar.gz
+          tar -xvf premake-5.0.0-beta8-linux.tar.gz
+          chmod +x premake5
 
       - name: Clone garrysmod_common
         run: git clone https://github.com/danielga/garrysmod_common.git
-
-      - name: Make premake executable
-        run: chmod +x premake5
 
       - name: Generate makefiles
         run: |
@@ -102,7 +112,7 @@ jobs:
         run: |
           make config=release_x86-64 -j$(nproc)
 
-      - name: Upload linux artifact
+      - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: gmsv_linux
