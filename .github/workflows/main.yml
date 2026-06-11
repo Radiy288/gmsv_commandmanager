@@ -37,7 +37,7 @@ jobs:
 
       - name: Build x64
         run: |
-          msbuild projects\commandmanager.sln /p:Configuration=Release /p:Platform=x64
+          msbuild projects\windows\vs2022\commandmanager.sln /p:Configuration=Release /p:Platform=x64
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
@@ -76,7 +76,7 @@ jobs:
 
       - name: Build win32
         run: |
-          msbuild projects\commandmanager.sln /p:Configuration=Release /p:Platform=Win32
+          msbuild projects\windows\vs2022\commandmanager.sln /p:Configuration=Release /p:Platform=Win32
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
