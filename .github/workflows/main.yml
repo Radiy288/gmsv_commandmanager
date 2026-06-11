@@ -1,0 +1,110 @@
+name: gmsv_commandmanager build
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+
+jobs:
+
+# =========================
+# WINDOWS x64 (VS2022)
+# =========================
+  windows-x64:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v2
+
+      - name: Clone garrysmod_common
+        run: git clone https://github.com/danielga/garrysmod_common.git
+
+      - name: Generate project (x64)
+        run: |
+          .\premake5.exe --gmcommon=.\garrysmod_common vs2022
+
+      - name: Build x64
+        run: |
+          msbuild projects\commandmanager.sln /p:Configuration=Release /p:Platform=x64
+
+      - name: Upload x64 artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: gmsv_win64
+          path: |
+            **/*win64*.dll
+            **/*.dll
+
+
+# =========================
+# WINDOWS x86 (win32)
+# =========================
+  windows-x86:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v2
+
+      - name: Clone garrysmod_common
+        run: git clone https://github.com/danielga/garrysmod_common.git
+
+      - name: Generate project (win32)
+        run: |
+          .\premake5.exe --gmcommon=.\garrysmod_common vs2022
+
+      - name: Build win32
+        run: |
+          msbuild projects\commandmanager.sln /p:Configuration=Release /p:Platform=Win32
+
+      - name: Upload win32 artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: gmsv_win32
+          path: |
+            **/*win32*.dll
+            **/*.dll
+
+
+# =========================
+# LINUX (x86_64)
+# =========================
+  linux:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install deps
+        run: |
+          sudo apt update
+          sudo apt install -y build-essential git
+
+      - name: Clone garrysmod_common
+        run: git clone https://github.com/danielga/garrysmod_common.git
+
+      - name: Make premake executable
+        run: chmod +x premake5
+
+      - name: Generate makefiles
+        run: |
+          ./premake5 --gmcommon=./garrysmod_common gmake2
+
+      - name: Build linux
+        run: |
+          make config=release_x86-64 -j$(nproc)
+
+      - name: Upload linux artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: gmsv_linux
+          path: |
+            **/*.so
