@@ -110,6 +110,7 @@ jobs:
 
       - name: Build linux
         run: |
+          cd projects/linux/gmake
           make config=release_x86-64 -j$(nproc)
 
       - name: Upload artifact
