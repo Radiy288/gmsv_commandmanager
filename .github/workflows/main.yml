@@ -26,11 +26,11 @@ jobs:
           Expand-Archive premake.zip -DestinationPath premake
 
       - name: Clone garrysmod_common
-        run: git clone https://github.com/danielga/garrysmod_common.git
+        run: git clone --recursive https://github.com/danielga/garrysmod_common.git
 
       - name: Generate project (x64)
         run: |
-          .\premake\premake5.exe --gmcommon=.\garrysmod_common vs2022
+          .\premake\premake5.exe --gmcommon=.\garrysmod_common --generator=v1 vs2022
 
       - name: Build x64
         run: |
@@ -62,11 +62,11 @@ jobs:
           Expand-Archive premake.zip -DestinationPath premake
 
       - name: Clone garrysmod_common
-        run: git clone https://github.com/danielga/garrysmod_common.git
+        run: git clone --recursive https://github.com/danielga/garrysmod_common.git
 
       - name: Generate project (win32)
         run: |
-          .\premake\premake5.exe --gmcommon=.\garrysmod_common vs2022
+          .\premake\premake5.exe --gmcommon=.\garrysmod_common --generator=v1 vs2022
 
       - name: Build win32
         run: |
@@ -102,7 +102,7 @@ jobs:
           chmod +x premake5
 
       - name: Clone garrysmod_common
-        run: git clone https://github.com/danielga/garrysmod_common.git
+        run: git clone --recursive https://github.com/danielga/garrysmod_common.git
 
       - name: Generate makefiles
         run: |
